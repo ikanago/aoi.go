@@ -20,6 +20,8 @@ func ParseCommand(input string) (Command, error) {
 		return Ping{}, nil
 	case "tweet":
 		parseTweetCommand(arguments)
+	case "memo":
+		parseMemoCommand(arguments)
 	}
 	return nil, errors.New("そのようなコマンドはありません")
 }
@@ -103,4 +105,17 @@ func assertArguments(arguments []string, length int, message string) error {
 		return errors.New(message)
 	}
 	return nil
+}
+
+func parseMemoCommand(arguments []string) (Command, error) {
+	if len(arguments) < 3 {
+		return nil, errors.New("メモしたい発言またはサブコマンドを指定してください")
+	}
+
+	if arguments[2] == "show" {
+		return MemoShow{}, nil
+	}
+	return MemoRegister{
+		Text: arguments[2],
+	}, nil
 }

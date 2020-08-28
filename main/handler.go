@@ -47,6 +47,14 @@ type TweetChange struct {
 // TweetShow represents parsed results of `twitter show` command.
 type TweetShow struct{}
 
+// MemoRegister represents parsed results of `memo TEXT` command.
+type MemoRegister struct {
+	Text string
+}
+
+// MemoShow represents parsed results of `memo TEXT` command.
+type MemoShow struct{}
+
 func (Help) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
 	messageEmbed := discordgo.MessageEmbed{
 		Color:  0x4bede7,
@@ -84,5 +92,12 @@ func (tweetChange TweetChange) handle(session *discordgo.Session, message *disco
 }
 
 func (tweetShow TweetShow) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	return
+}
+
+func (memoShow MemoShow) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	return
+}
+func (memoRegister MemoRegister) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
 	return
 }

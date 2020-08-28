@@ -118,3 +118,33 @@ func TestParseTweetCommand(t *testing.T) {
 		assert.Nil(err)
 	})
 }
+
+func TestParseMemoCommand(t *testing.T) {
+	t.Run("Command not specified", func(t *testing.T) {
+		input := []string{"<@!1234567890>", "memo"}
+		actual, err := parseMemoCommand(input)
+		assert := assert.New(t)
+		assert.Nil(actual)
+		assert.NotNil(err)
+	})
+
+	t.Run("Show command", func(t *testing.T) {
+		input := []string{"<@!1234567890>", "memo", "show"}
+		expected := MemoShow{}
+		actual, err := parseMemoCommand(input)
+		assert := assert.New(t)
+		assert.Equal(expected, actual)
+		assert.Nil(err)
+	})
+
+	t.Run("Memo command", func(t *testing.T) {
+		input := []string{"<@!1234567890>", "memo", "あいうえおabcde"}
+		expected := MemoRegister{
+			Text: "あいうえおabcde",
+		}
+		actual, err := parseMemoCommand(input)
+		assert := assert.New(t)
+		assert.Equal(expected, actual)
+		assert.Nil(err)
+	})
+}
