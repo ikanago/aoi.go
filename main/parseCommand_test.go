@@ -53,7 +53,7 @@ func TestParseTweetCommand(t *testing.T) {
 	t.Run("Create command", func(t *testing.T) {
 		input := []string{"<@!1234567890>", "tweet", "create", "ab_12_cd", "地震", "Aoi"}
 		expected := TweetCreate{
-			ID: "ab_12_cd",
+			ID:       "ab_12_cd",
 			Keywords: []string{"地震", "Aoi"},
 		}
 		actual, err := parseTweetCommand(input)
@@ -65,7 +65,7 @@ func TestParseTweetCommand(t *testing.T) {
 	t.Run("Add command", func(t *testing.T) {
 		input := []string{"<@!1234567890>", "tweet", "add", "docker", "container", "k8s", "cloud"}
 		expected := TweetAdd{
-			ID: "docker",
+			ID:       "docker",
 			Keywords: []string{"container", "k8s", "cloud"},
 		}
 		actual, err := parseTweetCommand(input)
@@ -77,7 +77,7 @@ func TestParseTweetCommand(t *testing.T) {
 	t.Run("Remove command", func(t *testing.T) {
 		input := []string{"<@!1234567890>", "tweet", "remove", "docker", "container", "k8s"}
 		expected := TweetRemove{
-			ID: "docker",
+			ID:       "docker",
 			Keywords: []string{"container", "k8s"},
 		}
 		actual, err := parseTweetCommand(input)
@@ -100,7 +100,7 @@ func TestParseTweetCommand(t *testing.T) {
 	t.Run("Change command", func(t *testing.T) {
 		input := []string{"<@!1234567890>", "tweet", "change", "docker", "#container"}
 		expected := TweetChange{
-			ID: "docker",
+			ID:      "docker",
 			Channel: "container",
 		}
 		actual, err := parseTweetCommand(input)

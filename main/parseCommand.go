@@ -34,41 +34,60 @@ func parseTweetCommand(arguments []string) (Command, error) {
 		if err := assertArguments(arguments, 5, "IDとキーワードを指定してください"); err != nil {
 			return nil, err
 		}
-		return TweetCreate {
-			ID: arguments[3],
+		id, err := validateTwitterID(arguments[3])
+		if err != nil {
+			return nil, err
+		}
+		return TweetCreate{
+			ID:       id,
 			Keywords: arguments[4:],
 		}, nil
 	case "add":
 		if err := assertArguments(arguments, 5, "IDとキーワードを指定してください"); err != nil {
 			return nil, err
 		}
-		return TweetAdd {
-			ID: arguments[3],
+		id, err := validateTwitterID(arguments[3])
+		if err != nil {
+			return nil, err
+		}
+		return TweetAdd{
+			ID:       id,
 			Keywords: arguments[4:],
 		}, nil
 	case "remove":
 		if err := assertArguments(arguments, 5, "IDとキーワードを指定してください"); err != nil {
 			return nil, err
 		}
-		return TweetRemove {
-			ID: arguments[3],
+		id, err := validateTwitterID(arguments[3])
+		if err != nil {
+			return nil, err
+		}
+		return TweetRemove{
+			ID:       id,
 			Keywords: arguments[4:],
 		}, nil
 	case "delete":
 		if err := assertArguments(arguments, 4, "IDを指定してください"); err != nil {
 			return nil, err
 		}
-		return TweetDelete {
-			ID: arguments[3],
+		id, err := validateTwitterID(arguments[3])
+		if err != nil {
+			return nil, err
+		}
+		return TweetDelete{
+			ID: id,
 		}, nil
 	case "change":
 		if err := assertArguments(arguments, 5, "IDとキーワードを指定してください"); err != nil {
 			return nil, err
 		}
-		channel := strings.Trim(arguments[4], "#")
-		return TweetChange {
-			ID: arguments[3],
-			Channel: channel,
+		id, err := validateTwitterID(arguments[3])
+		if err != nil {
+			return nil, err
+		}
+		return TweetChange{
+			ID:      id,
+			Channel: formatChannleID(arguments[4]),
 		}, nil
 	case "show":
 		return TweetShow{}, nil
