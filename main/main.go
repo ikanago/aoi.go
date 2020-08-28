@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
@@ -45,11 +44,11 @@ func main() {
 
 // Credential is a struct to hold a token fetched from Google Secret Manager.
 type Credential struct {
-	ConsumerKey string `json:"CONSUMER_KEY"`
-	ConsumerSecret string `json:"CONSUMER_SECRET"`
-	AccessToken string `json:"ACCESS_TOKEN"`
+	ConsumerKey       string `json:"CONSUMER_KEY"`
+	ConsumerSecret    string `json:"CONSUMER_SECRET"`
+	AccessToken       string `json:"ACCESS_TOKEN"`
 	AccessTokenSecret string `json:"ACCESS_TOKEN_SECRET"`
-	DiscordToken string `json:"DISCORD_TOKEN"`
+	DiscordToken      string `json:"DISCORD_TOKEN"`
 }
 
 func accessSecretVersion(projectID string, secretID string) (*Credential, error) {
@@ -81,11 +80,15 @@ func OnMessageCreate(session *discordgo.Session, message *discordgo.MessageCreat
 		return
 	}
 
-	arguments := strings.Fields(message.Content)
-	if len(arguments) < 2 {
+	command, err := ParseCommand(message.Content)
+	if err != nil {
+		log.Println(err)
+		session.ChannelMessageSend(message.ChannelID, err.Error())
 		return
 	}
-	if arguments[1] == "ping" {
-		session.ChannelMessageSend(message.ChannelID, "Pong from golang!")
+
+	if err := command.handle(session, message.Message); err != nil {
+		log.Println(err)
+		session.ChannelMessageSend(message.ChannelID, err.Error())
 	}
 }
