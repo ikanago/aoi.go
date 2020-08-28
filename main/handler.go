@@ -16,7 +16,13 @@ type Help struct{}
 type Ping struct{}
 
 func (Help) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
-	_, err = session.ChannelMessageSend(message.ChannelID, "help")
+	messageEmbed := discordgo.MessageEmbed{
+		Color: 0x4bede7,
+		Type: discordgo.EmbedTypeRich,
+		Title: "アオイチャンのコマンド",
+		Fields: helpMessageEmbeds,
+	}
+	_, err = session.ChannelMessageSendEmbed(message.ChannelID, &messageEmbed)
 	return
 }
 
