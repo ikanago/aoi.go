@@ -15,8 +15,7 @@ env:
   GCP_PROJECT_ID: ${{secrets.GCP_PROJECT_ID}}
   GCP_ZONE: ${{secrets.GCP_ZONE}}
   GCP_SECRET_ID: ${{secrets.GCP_SECRET_ID}}
-  SA_KEY: ${{secrets.SA_KEY}}
-  IMAGE_URL: gcr.io/${{secrets.GCP_PROJECT_ID}}/akane:${{github.sha}}
+  IMAGE_URL: gcr.io/${{secrets.GCP_PROJECT_ID}}/aoi:${{github.sha}}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -34,7 +33,7 @@ jobs:
       uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         version: '290.0.1'
-        service_account_key: ${SA_KEY}
+        service_account_key: ${{secrets.SA_KEY}}
 
     - name: Configure gcloud
       run: |
