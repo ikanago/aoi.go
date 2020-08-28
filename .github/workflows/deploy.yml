@@ -34,7 +34,7 @@ jobs:
       uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         version: '290.0.1'
-        service_account_key: $SA_KEY
+        service_account_key: ${SA_KEY}
 
     - name: Configure gcloud
       run: |
