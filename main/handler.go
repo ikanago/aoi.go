@@ -9,8 +9,10 @@ type Command interface {
 	handle(*discordgo.Session, *discordgo.Message) error
 }
 
+// Help represents parsed results of `help` command.
 type Help struct{}
 
+// Ping represents parsed results of `ping` command.
 type Ping struct{}
 
 func (Help) handle(session *discordgo.Session, message *discordgo.Message) (err error) {

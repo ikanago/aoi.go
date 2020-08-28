@@ -75,6 +75,8 @@ func accessSecretVersion(projectID string, secretID string) (*Credential, error)
 	return &credential, nil
 }
 
+// OnMessageCreate is called when there is a new message in a guild this bot is belogns to.
+// If this bot is mentioned, parse command and do corresponding actions.
 func OnMessageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
 	if message.Author.ID == session.State.User.ID || len(message.Mentions) == 0 || message.Mentions[0].Username != session.State.User.Username {
 		return
