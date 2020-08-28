@@ -17,7 +17,7 @@ var helpMessageEmbeds = []*discordgo.MessageEmbedField{
         "`@Aoi tweet add    ID KEYWORDS`:  既に存在するIDに対してキーワードを追加します\n" +
         "`@Aoi tweet remove ID KEYWORDS`:  既に存在するIDに対してキーワードを削除します\n" +
         "`@Aoi tweet delete ID         `:  そのIDに関するフィルタをすべて削除します\n" +
-        "`@Aoi tweet change ID CHANNEL` :  そのIDのツイートを送信するチャンネルを指定します\n" +
+        "`@Aoi tweet change ID CHANNEL` :  そのIDのツイートを送信するチャンネルを変更します\n" +
         "`@Aoi tweet show`              :  現在登録されているフィルタの一覧を表示します",
 	},
 	{
