@@ -115,7 +115,8 @@ func parseMemoCommand(arguments []string) (Command, error) {
 	if arguments[2] == "show" {
 		return MemoShow{}, nil
 	}
+	memo := strings.Join(arguments[2:], " ")
 	return MemoRegister{
-		Text: arguments[2],
+		Text: memo,
 	}, nil
 }
