@@ -19,9 +19,9 @@ func ParseCommand(input string) (Command, error) {
 	case "ping":
 		return Ping{}, nil
 	case "tweet":
-		parseTweetCommand(arguments)
+		return parseTweetCommand(arguments)
 	case "memo":
-		parseMemoCommand(arguments)
+		return parseMemoCommand(arguments)
 	}
 	return nil, errors.New("そのようなコマンドはありません")
 }

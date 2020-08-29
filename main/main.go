@@ -22,15 +22,20 @@ func main() {
 		return
 	}
 
-	client, err := discordgo.New("Bot " + credential.DiscordToken)
+	discordClient, err := discordgo.New("Bot " + credential.DiscordToken)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	client.AddHandler(OnMessageCreate)
+	defer discordClient.Close()
+	discordClient.AddHandler(OnMessageCreate)
 
-	err = client.Open()
-	if err != nil {
+	if err = discordClient.Open(); err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	if err = loadFirestore(); err != nil {
 		log.Fatal(err)
 		return
 	}
@@ -39,7 +44,6 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-	client.Close()
 }
 
 // Credential is a struct to hold a token fetched from Google Secret Manager.

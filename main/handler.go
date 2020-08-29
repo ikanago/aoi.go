@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -63,6 +65,9 @@ func (Help) handle(session *discordgo.Session, message *discordgo.Message) (err 
 		Fields: helpMessageEmbeds,
 	}
 	_, err = session.ChannelMessageSendEmbed(message.ChannelID, &messageEmbed)
+	if err != nil {
+		log.Println(err)
+	}
 	return
 }
 
@@ -99,5 +104,15 @@ func (memoShow MemoShow) handle(session *discordgo.Session, message *discordgo.M
 	return
 }
 func (memoRegister MemoRegister) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	reply, err := addMemo(message.ChannelID, memoRegister.Text)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	_, err = session.ChannelMessageSend(message.ChannelID, reply)
+	if err != nil {
+		log.Println(err)
+	}
 	return
 }
