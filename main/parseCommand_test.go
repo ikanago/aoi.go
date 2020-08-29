@@ -138,9 +138,9 @@ func TestParseMemoCommand(t *testing.T) {
 	})
 
 	t.Run("Memo command", func(t *testing.T) {
-		input := []string{"<@!1234567890>", "memo", "あいうえおabcde"}
+		input := []string{"<@!1234567890>", "memo", "あいうえお", "abcde", "諸行無常"}
 		expected := MemoRegister{
-			Text: "あいうえおabcde",
+			Text: "あいうえお abcde 諸行無常",
 		}
 		actual, err := parseMemoCommand(input)
 		assert := assert.New(t)
