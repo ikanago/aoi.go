@@ -31,13 +31,13 @@ type MemoDocument struct {
 func addMemo(channelID string, text string) (message string, err error) {
 	currentTime := time.Now()
 	documentID := currentTime.String()
-	
+
 	collection := firestoreClient.Collection(memoCollectionName)
 	doc := collection.Doc(documentID)
 	ctx := context.Background()
-	_, err = doc.Create(ctx, MemoDocument {
+	_, err = doc.Create(ctx, MemoDocument{
 		ChannelID: channelID,
-		Text: text,
+		Text:      text,
 		Timestamp: currentTime,
 	})
 	if err != nil {
@@ -46,5 +46,24 @@ func addMemo(channelID string, text string) (message string, err error) {
 	}
 
 	message = fmt.Sprintf("%s を記録しました", text)
+	return
+}
+
+func fetchMemo(channelID string) (memos []MemoDocument, err error) {
+	collection := firestoreClient.Collection(memoCollectionName)
+	query := collection.Where("channelID", "==", channelID).OrderBy("timestamp", firestore.Asc)
+	ctx := context.Background()
+	docs, err := query.Documents(ctx).GetAll()
+	if err != nil {
+		return
+	}
+
+	for _, doc := range docs {
+		var memo MemoDocument
+		if err = doc.DataTo(&memo); err != nil {
+			return
+		}
+		memos = append(memos, memo)
+	}
 	return
 }

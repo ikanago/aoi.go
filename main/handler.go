@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"errors"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -65,9 +66,6 @@ func (Help) handle(session *discordgo.Session, message *discordgo.Message) (err 
 		Fields: helpMessageEmbeds,
 	}
 	_, err = session.ChannelMessageSendEmbed(message.ChannelID, &messageEmbed)
-	if err != nil {
-		log.Println(err)
-	}
 	return
 }
 
@@ -101,18 +99,28 @@ func (tweetShow TweetShow) handle(session *discordgo.Session, message *discordgo
 }
 
 func (memoShow MemoShow) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	memos, err := fetchMemo(message.ChannelID)
+	if err != nil {
+		return
+	}
+	if len(memos) == 0 {
+		return errors.New("このチャンネルにはまだ発言が記録されていません")
+	}
+
+	var reply string
+	for i, memo := range memos {
+		reply += fmt.Sprintf("%2d: %s (%s)\n", i, memo.Text, memo.Timestamp.Format("2006-01-02"))
+	}
+	_, err = session.ChannelMessageSend(message.ChannelID, reply)
 	return
 }
+
 func (memoRegister MemoRegister) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
 	reply, err := addMemo(message.ChannelID, memoRegister.Text)
 	if err != nil {
-		log.Println(err)
 		return
 	}
 
 	_, err = session.ChannelMessageSend(message.ChannelID, reply)
-	if err != nil {
-		log.Println(err)
-	}
 	return
 }
