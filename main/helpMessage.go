@@ -24,7 +24,7 @@ var helpMessageEmbeds = []*discordgo.MessageEmbedField{
 		Name: "アイデアの記録",
 		Value: "あとから一覧にして見返せるように発言を各チャンネルごとに記録できます\n" +
 			"`TEXT`:  記録したい発言\n" +
-			"`@Aoi memo TEXT`:  発言を記録します\n" +
+			"`@Aoi memo TEXT`:  発言を記録します 空白や改行を入れても問題ありません\n" +
 			"`@Aoi memo show`:  そのチャンネルで記録された発言を一覧表示します",
 	},
 	{
