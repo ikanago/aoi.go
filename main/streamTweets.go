@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -29,12 +30,10 @@ func InitClient(credential *Credential) error {
 func InitStream(session *discordgo.Session) (stream *twitter.Stream, demux twitter.SwitchDemux, err error) {
 	demux = twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
-		fmt.Println(tweet.Text)
 		filter := GetFilter(tweet.User.ScreenName)
 		isSatisfy, channelID := filterTweet(filter, tweet.Text)
 		if isSatisfy {
-			tweetURL := fmt.Sprintf("https://twitter.com/%s/status/%s", tweet.User.ScreenName, tweet.IDStr)
-			reply := tweet.Text + "\n" + tweetURL
+			reply := formatTweet(tweet.Text, tweet.User.ScreenName, tweet.IDStr)
 			_, err = session.ChannelMessageSend(channelID, reply)
 			return
 		}
@@ -64,6 +63,15 @@ func filterTweet(filter *FilterDocument, tweet string) (isSatisfy bool, channelI
 		}
 	}
 	return false, ""
+}
+
+const hyperLinkPattern = `(http|https):\/\/([a-zA-Z0-9.]/?)+`
+
+var hyperLinkRegExp = regexp.MustCompile(hyperLinkPattern)
+
+func formatTweet(text, screenName , id string) string {
+	text = string(hyperLinkRegExp.ReplaceAll([]byte(text), []byte("")))
+	return fmt.Sprintf("%s\nhttps://twitter.com/%s/status/%s", text, screenName, id)
 }
 
 // GetUserID queries id string of a specific screen name.
