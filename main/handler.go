@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -20,31 +21,31 @@ type Ping struct{}
 
 // TweetCreate represents parsed results of `twitter create` command.
 type TweetCreate struct {
-	ID       string
-	Keywords []string
+	ScreenName string
+	Keywords   []string
 }
 
 // TweetAdd represents parsed results of `twitter add` command.
 type TweetAdd struct {
-	ID       string
-	Keywords []string
+	ScreenName string
+	Keywords   []string
 }
 
 // TweetRemove represents parsed results of `twitter remove` command.
 type TweetRemove struct {
-	ID       string
-	Keywords []string
+	ScreenName string
+	Keywords   []string
 }
 
 // TweetDelete represents parsed results of `twitter delete` command.
 type TweetDelete struct {
-	ID string
+	ScreenName string
 }
 
 // TweetChange represents parsed results of `twitter change` command.
 type TweetChange struct {
-	ID      string
-	Channel string
+	ScreenName string
+	Channel    string
 }
 
 // TweetShow represents parsed results of `twitter show` command.
@@ -75,10 +76,22 @@ func (Ping) handle(session *discordgo.Session, message *discordgo.Message) (err 
 }
 
 func (tweetCreate TweetCreate) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	err = createFilter(tweetCreate.ScreenName, tweetCreate.Keywords, message.ChannelID)
+	if err != nil {
+		return
+	}
+	reply := fmt.Sprintf("@%s のフィルターを作成しました\n現在のキーワード: %s", tweetCreate.ScreenName, strings.Join(tweetCreate.Keywords, ", "))
+	_, err = session.ChannelMessageSend(message.ChannelID, reply)
 	return
 }
 
 func (tweetAdd TweetAdd) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	updatedKeywords, err := addFilter(tweetAdd.ScreenName, tweetAdd.Keywords)
+	if err != nil {
+		return
+	}
+	reply := fmt.Sprintf("@%s のフィルターを更新しました\n現在のキーワード: %s", tweetAdd.ScreenName, strings.Join(updatedKeywords, ", "))
+	_, err = session.ChannelMessageSend(message.ChannelID, reply)
 	return
 }
 

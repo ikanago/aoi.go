@@ -2,22 +2,129 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	firestore "cloud.google.com/go/firestore"
 )
 
-const memoCollectionName = "Memo"
+const (
+	memoCollectionName        string = "Memo"
+	tweetFilterCollectionName string = "Filters"
+	defaultChannelID          string = "626795866556203021"
+)
+
+// FilterDocument represents  a filter of tweet.
+type FilterDocument struct {
+	ID         string   `firestore:"id"`
+	ScreenName string   `firestore:"screenName"`
+	Keywords   []string `firestore:"keywords"`
+	ChannelID  string   `firestore:"channelID"`
+}
 
 var firestoreClient *firestore.Client
 
-func loadFirestore() (err error) {
+var tweetFilters = make(map[string]*FilterDocument)
+
+// GetFilter returns filter corresponding to given screen name.
+func GetFilter(screenName string) *FilterDocument {
+	if filter, exists := tweetFilters[screenName]; exists {
+		return filter
+	}
+	return nil
+}
+
+// Map twitter screen name (@NAME) to id string (111111111111).
+var screenNameToID = make(map[string]string)
+
+// GetAllIDs yields all registerd filters
+func GetAllIDs() (ids []string) {
+	for _, id := range screenNameToID {
+		ids = append(ids, id)
+	}
+	return
+}
+
+func loadFirestore(projectID string) (err error) {
 	ctx := context.Background()
-	projectID := os.Getenv("PROJECT_ID")
 	firestoreClient, err = firestore.NewClient(ctx, projectID)
+
+	filters, err := fetchFilters()
+	if err != nil {
+		return
+	}
+
+	for _, filter := range filters {
+		tweetFilters[filter.ScreenName] = &filter
+		screenNameToID[filter.ScreenName] = filter.ID
+	}
+	return
+}
+
+func createFilter(screenName string, filters []string, channelID string) (err error) {
+	if _, exists := tweetFilters[screenName]; exists {
+		return errors.New("そのアカウントのフィルターは作成済みです\n`@Aoi tweet add ID KEYWORDS` を使ってください")
+	}
+
+	collection := firestoreClient.Collection(tweetFilterCollectionName)
+	doc := collection.Doc(screenName)
+	ctx := context.Background()
+	id, err := getUserID(screenName)
+	if err != nil {
+		return
+	}
+
+	filter := FilterDocument{
+		ID:         id,
+		ScreenName: screenName,
+		Keywords:   filters,
+		ChannelID:  channelID,
+	}
+	_, err = doc.Create(ctx, filter)
+	if err != nil {
+		return
+	}
+
+	tweetFilters[screenName] = &filter
+	return
+}
+
+func addFilter(screenName string, filters []string) (updatedKeywords []string, err error) {
+	if _, exists := tweetFilters[screenName]; !exists {
+		return nil, errors.New("そのアカウントのフィルターは存在しません\n`@Aoi tweet add ID KEYWORDS` でフィルターを作ってください")
+	}
+
+	collection := firestoreClient.Collection(tweetFilterCollectionName)
+	doc := collection.Doc(screenName)
+	ctx := context.Background()
+	updatedKeywords = append(tweetFilters[screenName].Keywords, filters...)
+	tweetFilters[screenName].Keywords = updatedKeywords
+	_, err = doc.Update(ctx, []firestore.Update{
+		{
+			Path:  "keywords",
+			Value: updatedKeywords,
+		},
+	})
+	return
+}
+
+func fetchFilters() (filters []FilterDocument, err error) {
+	collection := firestoreClient.Collection(tweetFilterCollectionName)
+	ctx := context.Background()
+	docs, err := collection.Documents(ctx).GetAll()
+	if err != nil {
+		return
+	}
+
+	for _, doc := range docs {
+		var filter FilterDocument
+		if err = doc.DataTo(&filter); err != nil {
+			return
+		}
+		filters = append(filters, filter)
+	}
 	return
 }
 
