@@ -29,7 +29,9 @@ func InitClient(credential *Credential) error {
 func InitStream(session *discordgo.Session) (stream *twitter.Stream, demux twitter.SwitchDemux, err error) {
 	demux = twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
-		isSatisfy, channelID := filterTweet(tweet.User.ScreenName, tweet.Text)
+		fmt.Println(tweet.Text)
+		filter := GetFilter(tweet.User.ScreenName)
+		isSatisfy, channelID := filterTweet(filter, tweet.Text)
 		if isSatisfy {
 			tweetURL := fmt.Sprintf("https://twitter.com/%s/status/%s", tweet.User.ScreenName, tweet.IDStr)
 			reply := tweet.Text + "\n" + tweetURL
@@ -46,8 +48,7 @@ func InitStream(session *discordgo.Session) (stream *twitter.Stream, demux twitt
 	return
 }
 
-func filterTweet(screenName string, tweet string) (isSatisfy bool, channelID string) {
-	filter := GetFilter(screenName)
+func filterTweet(filter *FilterDocument, tweet string) (isSatisfy bool, channelID string) {
 	if filter == nil {
 		return false, ""
 	}
