@@ -7,5 +7,5 @@ require (
 	cloud.google.com/go/firestore v1.3.0
 	github.com/bwmarrin/discordgo v0.22.0
 	github.com/stretchr/testify v1.4.0
-	google.golang.org/genproto v0.0.0-20200828030656-73b5761be4c5
+	google.golang.org/genproto v0.0.0-20200829155447-2bf3329a0021
 )

@@ -22,6 +22,7 @@ func main() {
 		return
 	}
 
+	log.Println("Read credential")
 	discordClient, err := discordgo.New("Bot " + credential.DiscordToken)
 	if err != nil {
 		log.Fatal(err)
