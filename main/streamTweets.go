@@ -61,6 +61,11 @@ func filterTweet(screenName string, tweet string) (isSatisfy bool, channelID str
 		return false, ""
 	}
 
+	// Exclude retweets
+	if strings.HasPrefix(tweet, "RT") {
+		return false, ""
+	}
+
 	for _, keyword := range filter.Keywords {
 		if strings.Contains(tweet, keyword) {
 			return true, filter.ChannelID

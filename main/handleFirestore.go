@@ -27,12 +27,12 @@ type FilterDocument struct {
 
 var firestoreClient *firestore.Client
 
-var tweetFilters = make(map[string]FilterDocument)
+var tweetFilters = make(map[string]*FilterDocument)
 
 // GetFilter returns filter corresponding to given screen name.
 func GetFilter(screenName string) *FilterDocument {
 	if filter, exists := tweetFilters[screenName]; exists {
-		return &filter
+		return filter
 	}
 	return nil
 }
@@ -58,7 +58,7 @@ func loadFirestore(projectID string) (err error) {
 	}
 
 	for _, filter := range filters {
-		tweetFilters[filter.ScreenName] = filter
+		tweetFilters[filter.ScreenName] = &filter
 		screenNameToID[filter.ScreenName] = filter.ID
 	}
 	return
@@ -88,8 +88,32 @@ func createFilter(screenName string, filters []string) (message string, err erro
 		return
 	}
 
-	tweetFilters[screenName] = filter
+	tweetFilters[screenName] = &filter
 	message = fmt.Sprintf("@%s のフィルターを作成しました\n現在のキーワード: %s", screenName, strings.Join(filters, ", "))
+	return
+}
+
+func addFilter(screenName string, filters []string) (message string, err error) {
+	if _, exists := tweetFilters[screenName]; !exists {
+		return "", errors.New("そのアカウントのフィルターは存在しません\n`@Aoi tweet add ID KEYWORDS` でフィルターを作ってください")
+	}
+
+	collection := firestoreClient.Collection(tweetFilterCollectionName)
+	doc := collection.Doc(screenName)
+	ctx := context.Background()
+	updatedKeywords := append(tweetFilters[screenName].Keywords, filters...)
+	tweetFilters[screenName].Keywords = updatedKeywords
+	_, err = doc.Update(ctx, []firestore.Update{
+		{
+			Path:  "Keywords",
+			Value: updatedKeywords,
+		},
+	})
+	if err != nil {
+		return
+	}
+
+	message = fmt.Sprintf("@%s のフィルターを更新しました\n現在のキーワード: %s", screenName, strings.Join(updatedKeywords, ", "))
 	return
 }
 

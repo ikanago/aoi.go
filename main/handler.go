@@ -84,6 +84,11 @@ func (tweetCreate TweetCreate) handle(session *discordgo.Session, message *disco
 }
 
 func (tweetAdd TweetAdd) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	reply, err := addFilter(tweetAdd.ScreenName, tweetAdd.Keywords)
+	if err != nil {
+		return
+	}
+	_, err = session.ChannelMessageSend(message.ChannelID, reply)
 	return
 }
 
