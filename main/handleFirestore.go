@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	firestore "cloud.google.com/go/firestore"
@@ -64,9 +63,9 @@ func loadFirestore(projectID string) (err error) {
 	return
 }
 
-func createFilter(screenName string, filters []string) (message string, err error) {
+func createFilter(screenName string, filters []string, channelID string) (err error) {
 	if _, exists := tweetFilters[screenName]; exists {
-		return "", errors.New("そのアカウントのフィルターは作成済みです\n`@Aoi tweet add ID KEYWORDS` を使ってください")
+		return errors.New("そのアカウントのフィルターは作成済みです\n`@Aoi tweet add ID KEYWORDS` を使ってください")
 	}
 
 	collection := firestoreClient.Collection(tweetFilterCollectionName)
@@ -81,7 +80,7 @@ func createFilter(screenName string, filters []string) (message string, err erro
 		ID:         id,
 		ScreenName: screenName,
 		Keywords:   filters,
-		ChannelID:  defaultChannelID,
+		ChannelID:  channelID,
 	}
 	_, err = doc.Create(ctx, filter)
 	if err != nil {
@@ -89,31 +88,25 @@ func createFilter(screenName string, filters []string) (message string, err erro
 	}
 
 	tweetFilters[screenName] = &filter
-	message = fmt.Sprintf("@%s のフィルターを作成しました\n現在のキーワード: %s", screenName, strings.Join(filters, ", "))
 	return
 }
 
-func addFilter(screenName string, filters []string) (message string, err error) {
+func addFilter(screenName string, filters []string) (updatedKeywords []string, err error) {
 	if _, exists := tweetFilters[screenName]; !exists {
-		return "", errors.New("そのアカウントのフィルターは存在しません\n`@Aoi tweet add ID KEYWORDS` でフィルターを作ってください")
+		return nil, errors.New("そのアカウントのフィルターは存在しません\n`@Aoi tweet add ID KEYWORDS` でフィルターを作ってください")
 	}
 
 	collection := firestoreClient.Collection(tweetFilterCollectionName)
 	doc := collection.Doc(screenName)
 	ctx := context.Background()
-	updatedKeywords := append(tweetFilters[screenName].Keywords, filters...)
+	updatedKeywords = append(tweetFilters[screenName].Keywords, filters...)
 	tweetFilters[screenName].Keywords = updatedKeywords
 	_, err = doc.Update(ctx, []firestore.Update{
 		{
-			Path:  "Keywords",
+			Path:  "keywords",
 			Value: updatedKeywords,
 		},
 	})
-	if err != nil {
-		return
-	}
-
-	message = fmt.Sprintf("@%s のフィルターを更新しました\n現在のキーワード: %s", screenName, strings.Join(updatedKeywords, ", "))
 	return
 }
 

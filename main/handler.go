@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -75,19 +76,21 @@ func (Ping) handle(session *discordgo.Session, message *discordgo.Message) (err 
 }
 
 func (tweetCreate TweetCreate) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
-	reply, err := createFilter(tweetCreate.ScreenName, tweetCreate.Keywords)
+	err = createFilter(tweetCreate.ScreenName, tweetCreate.Keywords, message.ChannelID)
 	if err != nil {
 		return
 	}
+	reply := fmt.Sprintf("@%s のフィルターを作成しました\n現在のキーワード: %s", tweetCreate.ScreenName, strings.Join(tweetCreate.Keywords, ", "))
 	_, err = session.ChannelMessageSend(message.ChannelID, reply)
 	return
 }
 
 func (tweetAdd TweetAdd) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
-	reply, err := addFilter(tweetAdd.ScreenName, tweetAdd.Keywords)
+	updatedKeywords, err := addFilter(tweetAdd.ScreenName, tweetAdd.Keywords)
 	if err != nil {
 		return
 	}
+	reply := fmt.Sprintf("@%s のフィルターを更新しました\n現在のキーワード: %s", tweetAdd.ScreenName, strings.Join(updatedKeywords, ", "))
 	_, err = session.ChannelMessageSend(message.ChannelID, reply)
 	return
 }
