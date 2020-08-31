@@ -20,31 +20,31 @@ type Ping struct{}
 
 // TweetCreate represents parsed results of `twitter create` command.
 type TweetCreate struct {
-	ID       string
-	Keywords []string
+	ScreenName string
+	Keywords   []string
 }
 
 // TweetAdd represents parsed results of `twitter add` command.
 type TweetAdd struct {
-	ID       string
-	Keywords []string
+	ScreenName string
+	Keywords   []string
 }
 
 // TweetRemove represents parsed results of `twitter remove` command.
 type TweetRemove struct {
-	ID       string
-	Keywords []string
+	ScreenName string
+	Keywords   []string
 }
 
 // TweetDelete represents parsed results of `twitter delete` command.
 type TweetDelete struct {
-	ID string
+	ScreenName string
 }
 
 // TweetChange represents parsed results of `twitter change` command.
 type TweetChange struct {
-	ID      string
-	Channel string
+	ScreenName string
+	Channel    string
 }
 
 // TweetShow represents parsed results of `twitter show` command.
@@ -75,7 +75,7 @@ func (Ping) handle(session *discordgo.Session, message *discordgo.Message) (err 
 }
 
 func (tweetCreate TweetCreate) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
-	reply, err := createFilter(tweetCreate.ID, tweetCreate.Keywords)
+	reply, err := createFilter(tweetCreate.ScreenName, tweetCreate.Keywords)
 	if err != nil {
 		return
 	}

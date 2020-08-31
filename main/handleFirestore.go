@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"time"
 
@@ -20,50 +19,77 @@ const (
 
 // FilterDocument represents  a filter of tweet.
 type FilterDocument struct {
-	ID        string `firestore:"id"`
-	Keywords  []string `firestore:"keywords"`
-	ChannelID string `firestore:"channelID"`
+	ID         string   `firestore:"id"`
+	ScreenName string   `firestore:"screenName"`
+	Keywords   []string `firestore:"keywords"`
+	ChannelID  string   `firestore:"channelID"`
 }
 
 var firestoreClient *firestore.Client
 
 var tweetFilters = make(map[string]FilterDocument)
 
-func loadFirestore() (err error) {
+// GetFilter returns filter corresponding to given screen name.
+func GetFilter(screenName string) *FilterDocument {
+	if filter, exists := tweetFilters[screenName]; exists {
+		return &filter
+	}
+	return nil
+}
+
+// Map twitter screen name (@NAME) to id string (111111111111).
+var screenNameToID = make(map[string]string)
+
+// GetAllIDs yields all registerd filters
+func GetAllIDs() (ids []string) {
+	for _, id := range screenNameToID {
+		ids = append(ids, id)
+	}
+	return
+}
+
+func loadFirestore(projectID string) (err error) {
 	ctx := context.Background()
-	projectID := os.Getenv("PROJECT_ID")
 	firestoreClient, err = firestore.NewClient(ctx, projectID)
 
 	filters, err := fetchFilters()
 	if err != nil {
 		return
 	}
+
 	for _, filter := range filters {
-		tweetFilters[filter.ID] = filter
+		tweetFilters[filter.ScreenName] = filter
+		screenNameToID[filter.ScreenName] = filter.ID
 	}
 	return
 }
 
-func createFilter(id string, filters []string) (message string, err error) {
-	if _, exists := tweetFilters[id]; exists {
+func createFilter(screenName string, filters []string) (message string, err error) {
+	if _, exists := tweetFilters[screenName]; exists {
 		return "", errors.New("そのアカウントのフィルターは作成済みです\n`@Aoi tweet add ID KEYWORDS` を使ってください")
 	}
 
 	collection := firestoreClient.Collection(tweetFilterCollectionName)
-	doc := collection.Doc(id)
+	doc := collection.Doc(screenName)
 	ctx := context.Background()
+	id, err := getUserID(screenName)
+	if err != nil {
+		return
+	}
+
 	filter := FilterDocument{
-		ID:        id,
-		Keywords:  filters,
-		ChannelID: defaultChannelID,
+		ID:         id,
+		ScreenName: screenName,
+		Keywords:   filters,
+		ChannelID:  defaultChannelID,
 	}
 	_, err = doc.Create(ctx, filter)
 	if err != nil {
 		return
 	}
 
-	tweetFilters[id] = filter
-	message = fmt.Sprintf("@%s のフィルターを作成しました\n現在のキーワード: %s", id, strings.Join(filters, ", "))
+	tweetFilters[screenName] = filter
+	message = fmt.Sprintf("@%s のフィルターを作成しました\n現在のキーワード: %s", screenName, strings.Join(filters, ", "))
 	return
 }
 

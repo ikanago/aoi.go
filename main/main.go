@@ -22,7 +22,6 @@ func main() {
 		return
 	}
 
-	log.Println("Read credential")
 	discordClient, err := discordgo.New("Bot " + credential.DiscordToken)
 	if err != nil {
 		log.Fatal(err)
@@ -36,10 +35,22 @@ func main() {
 		return
 	}
 
-	if err = loadFirestore(); err != nil {
+	if err = loadFirestore(projectID); err != nil {
 		log.Fatal(err)
 		return
 	}
+
+	if err = initClient(credential); err != nil {
+		log.Fatal(err)
+		return
+	}
+	stream, demux, err := initStream(discordClient)
+	defer stream.Stop()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	go demux.HandleChan(stream.Messages)
 
 	log.Println("Bot is running")
 	sc := make(chan os.Signal, 1)
