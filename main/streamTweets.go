@@ -12,7 +12,8 @@ import (
 
 var twitterClient *twitter.Client
 
-func initClient(credential *Credential) error {
+// InitClient initializes Twitter Client.
+func InitClient(credential *Credential) error {
 	if credential.ConsumerKey == "" || credential.ConsumerSecret == "" || credential.AccessToken == "" || credential.AccessTokenSecret == "" {
 		return errors.New("Twitter API tokens not specified")
 	}
@@ -24,7 +25,8 @@ func initClient(credential *Credential) error {
 	return nil
 }
 
-func initStream(session *discordgo.Session) (stream *twitter.Stream, demux twitter.SwitchDemux, err error) {
+// InitStream initializes tweet stream.
+func InitStream(session *discordgo.Session) (stream *twitter.Stream, demux twitter.SwitchDemux, err error) {
 	demux = twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
 		isSatisfy, channelID := filterTweet(tweet.User.ScreenName, tweet.Text)
@@ -41,17 +43,6 @@ func initStream(session *discordgo.Session) (stream *twitter.Stream, demux twitt
 		Follow: ids,
 	}
 	stream, err = twitterClient.Streams.Filter(filterParam)
-	return
-}
-
-func getUserID(screenName string) (id string, err error) {
-	users, _, err := twitterClient.Users.Lookup(&twitter.UserLookupParams{
-		ScreenName: []string{screenName},
-	})
-	if err != nil {
-		return
-	}
-	id = users[0].IDStr
 	return
 }
 
@@ -72,4 +63,16 @@ func filterTweet(screenName string, tweet string) (isSatisfy bool, channelID str
 		}
 	}
 	return false, ""
+}
+
+// GetUserID queries id string of a specific screen name.
+func GetUserID(screenName string) (id string, err error) {
+	users, _, err := twitterClient.Users.Lookup(&twitter.UserLookupParams{
+		ScreenName: []string{screenName},
+	})
+	if err != nil {
+		return
+	}
+	id = users[0].IDStr
+	return
 }

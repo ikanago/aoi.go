@@ -4,7 +4,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-var helpMessageEmbeds = []*discordgo.MessageEmbedField{
+// HelpMessageEmbeds is contents of `help` command.
+var HelpMessageEmbeds = []*discordgo.MessageEmbedField{
 	{
 		Name: "カスタム絵文字作成",
 		Value: "アオイチャンは条件にあったTweetを #subscription に転送してくれます\n" +

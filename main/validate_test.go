@@ -9,7 +9,7 @@ func TestValidateTwitterID(t *testing.T) {
 	t.Run("Valid ID", func(t *testing.T) {
 		input := "ab_12_cd"
 		expected := "ab_12_cd"
-		actual, err := validateTwitterID(input)
+		actual, err := ValidateTwitterID(input)
 		assert := assert.New(t)
 		assert.Equal(expected, actual)
 		assert.Nil(err)
@@ -18,7 +18,7 @@ func TestValidateTwitterID(t *testing.T) {
 	t.Run("Invalid ID", func(t *testing.T) {
 		input := "ab_12_cd?"
 		expected := ""
-		actual, err := validateTwitterID(input)
+		actual, err := ValidateTwitterID(input)
 		assert := assert.New(t)
 		assert.Equal(expected, actual)
 		assert.NotNil(err)
@@ -27,7 +27,7 @@ func TestValidateTwitterID(t *testing.T) {
 	t.Run("Invalid ID", func(t *testing.T) {
 		input := "あいうえお"
 		expected := ""
-		actual, err := validateTwitterID(input)
+		actual, err := ValidateTwitterID(input)
 		assert := assert.New(t)
 		assert.Equal(expected, actual)
 		assert.NotNil(err)

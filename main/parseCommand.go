@@ -36,7 +36,7 @@ func parseTweetCommand(arguments []string) (Command, error) {
 		if err := assertArguments(arguments, 5, "IDとキーワードを指定してください"); err != nil {
 			return nil, err
 		}
-		screenName, err := validateTwitterID(arguments[3])
+		screenName, err := ValidateTwitterID(arguments[3])
 		if err != nil {
 			return nil, err
 		}
@@ -48,7 +48,7 @@ func parseTweetCommand(arguments []string) (Command, error) {
 		if err := assertArguments(arguments, 5, "IDとキーワードを指定してください"); err != nil {
 			return nil, err
 		}
-		screenName, err := validateTwitterID(arguments[3])
+		screenName, err := ValidateTwitterID(arguments[3])
 		if err != nil {
 			return nil, err
 		}
@@ -60,7 +60,7 @@ func parseTweetCommand(arguments []string) (Command, error) {
 		if err := assertArguments(arguments, 5, "IDとキーワードを指定してください"); err != nil {
 			return nil, err
 		}
-		screenName, err := validateTwitterID(arguments[3])
+		screenName, err := ValidateTwitterID(arguments[3])
 		if err != nil {
 			return nil, err
 		}
@@ -72,7 +72,7 @@ func parseTweetCommand(arguments []string) (Command, error) {
 		if err := assertArguments(arguments, 4, "IDを指定してください"); err != nil {
 			return nil, err
 		}
-		screenName, err := validateTwitterID(arguments[3])
+		screenName, err := ValidateTwitterID(arguments[3])
 		if err != nil {
 			return nil, err
 		}
@@ -83,13 +83,13 @@ func parseTweetCommand(arguments []string) (Command, error) {
 		if err := assertArguments(arguments, 5, "IDとキーワードを指定してください"); err != nil {
 			return nil, err
 		}
-		screenName, err := validateTwitterID(arguments[3])
+		screenName, err := ValidateTwitterID(arguments[3])
 		if err != nil {
 			return nil, err
 		}
 		return TweetChange{
 			ScreenName: screenName,
-			Channel:    formatChannleID(arguments[4]),
+			Channel:    FormatChannelID(arguments[4]),
 		}, nil
 	case "show":
 		return TweetShow{}, nil
