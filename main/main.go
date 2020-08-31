@@ -28,23 +28,23 @@ func main() {
 		return
 	}
 	defer discordClient.Close()
-	discordClient.AddHandler(OnMessageCreate)
+	discordClient.AddHandler(onMessageCreate)
 
 	if err = discordClient.Open(); err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	if err = loadFirestore(projectID); err != nil {
+	if err = LoadFirestore(projectID); err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	if err = initClient(credential); err != nil {
+	if err = InitClient(credential); err != nil {
 		log.Fatal(err)
 		return
 	}
-	stream, demux, err := initStream(discordClient)
+	stream, demux, err := InitStream(discordClient)
 	defer stream.Stop()
 	if err != nil {
 		log.Fatal(err)
@@ -91,9 +91,9 @@ func accessSecretVersion(projectID string, secretID string) (*Credential, error)
 	return &credential, nil
 }
 
-// OnMessageCreate is called when there is a new message in a guild this bot is belogns to.
+// onMessageCreate is called when there is a new message in a guild this bot is belogns to.
 // If this bot is mentioned, parse command and do corresponding actions.
-func OnMessageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
+func onMessageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
 	if message.Author.ID == session.State.User.ID || len(message.Mentions) == 0 || message.Mentions[0].Username != session.State.User.Username {
 		return
 	}
@@ -105,7 +105,7 @@ func OnMessageCreate(session *discordgo.Session, message *discordgo.MessageCreat
 		return
 	}
 
-	if err := command.handle(session, message.Message); err != nil {
+	if err := command.Handle(session, message.Message); err != nil {
 		log.Println(err)
 		session.ChannelMessageSend(message.ChannelID, err.Error())
 	}

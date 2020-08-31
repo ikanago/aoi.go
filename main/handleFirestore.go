@@ -13,7 +13,6 @@ import (
 const (
 	memoCollectionName        string = "Memo"
 	tweetFilterCollectionName string = "Filters"
-	defaultChannelID          string = "626795866556203021"
 )
 
 // FilterDocument represents  a filter of tweet.
@@ -47,7 +46,8 @@ func GetAllIDs() (ids []string) {
 	return
 }
 
-func loadFirestore(projectID string) (err error) {
+// LoadFirestore initializes firestore client and fetch data from firestore.
+func LoadFirestore(projectID string) (err error) {
 	ctx := context.Background()
 	firestoreClient, err = firestore.NewClient(ctx, projectID)
 
@@ -63,7 +63,8 @@ func loadFirestore(projectID string) (err error) {
 	return
 }
 
-func createFilter(screenName string, filters []string, channelID string) (err error) {
+// CreateFilter creates data on firestore.
+func CreateFilter(screenName string, filters []string, channelID string) (err error) {
 	if _, exists := tweetFilters[screenName]; exists {
 		return errors.New("そのアカウントのフィルターは作成済みです\n`@Aoi tweet add ID KEYWORDS` を使ってください")
 	}
@@ -71,7 +72,7 @@ func createFilter(screenName string, filters []string, channelID string) (err er
 	collection := firestoreClient.Collection(tweetFilterCollectionName)
 	doc := collection.Doc(screenName)
 	ctx := context.Background()
-	id, err := getUserID(screenName)
+	id, err := GetUserID(screenName)
 	if err != nil {
 		return
 	}
@@ -88,10 +89,12 @@ func createFilter(screenName string, filters []string, channelID string) (err er
 	}
 
 	tweetFilters[screenName] = &filter
+	screenNameToID[screenName] = id
 	return
 }
 
-func addFilter(screenName string, filters []string) (updatedKeywords []string, err error) {
+// AddFilter adds keywords to existing filter.
+func AddFilter(screenName string, filters []string) (updatedKeywords []string, err error) {
 	if _, exists := tweetFilters[screenName]; !exists {
 		return nil, errors.New("そのアカウントのフィルターは存在しません\n`@Aoi tweet add ID KEYWORDS` でフィルターを作ってください")
 	}
@@ -135,7 +138,8 @@ type MemoDocument struct {
 	Timestamp time.Time `firestore:"timestamp"`
 }
 
-func addMemo(channelID string, text string) (message string, err error) {
+// CreateMemo creates a new memo on firestore.
+func CreateMemo(channelID string, text string) (message string, err error) {
 	currentTime := time.Now()
 	documentID := currentTime.String()
 
@@ -156,7 +160,8 @@ func addMemo(channelID string, text string) (message string, err error) {
 	return
 }
 
-func fetchMemo(channelID string) (memos []MemoDocument, err error) {
+// FetchMemo fetches existing memos belong to a given channel.
+func FetchMemo(channelID string) (memos []MemoDocument, err error) {
 	collection := firestoreClient.Collection(memoCollectionName)
 	query := collection.Where("channelID", "==", channelID).OrderBy("timestamp", firestore.Asc)
 	ctx := context.Background()

@@ -10,7 +10,7 @@ import (
 
 // Command is an interface of parsed commands.
 type Command interface {
-	handle(*discordgo.Session, *discordgo.Message) error
+	Handle(*discordgo.Session, *discordgo.Message) error
 }
 
 // Help represents parsed results of `help` command.
@@ -59,24 +59,27 @@ type MemoRegister struct {
 // MemoShow represents parsed results of `memo TEXT` command.
 type MemoShow struct{}
 
-func (Help) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+// Handle deals `help` command.
+func (Help) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
 	messageEmbed := discordgo.MessageEmbed{
 		Color:  0x4bede7,
 		Type:   discordgo.EmbedTypeRich,
 		Title:  "アオイチャンのコマンド",
-		Fields: helpMessageEmbeds,
+		Fields: HelpMessageEmbeds,
 	}
 	_, err = session.ChannelMessageSendEmbed(message.ChannelID, &messageEmbed)
 	return
 }
 
-func (Ping) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+// Handle deals `ping` command.
+func (Ping) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
 	_, err = session.ChannelMessageSend(message.ChannelID, "Pong!")
 	return
 }
 
-func (tweetCreate TweetCreate) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
-	err = createFilter(tweetCreate.ScreenName, tweetCreate.Keywords, message.ChannelID)
+// Handle deals `tweet create` command.
+func (tweetCreate TweetCreate) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	err = CreateFilter(tweetCreate.ScreenName, tweetCreate.Keywords, message.ChannelID)
 	if err != nil {
 		return
 	}
@@ -85,8 +88,9 @@ func (tweetCreate TweetCreate) handle(session *discordgo.Session, message *disco
 	return
 }
 
-func (tweetAdd TweetAdd) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
-	updatedKeywords, err := addFilter(tweetAdd.ScreenName, tweetAdd.Keywords)
+// Handle deals `tweet add` command.
+func (tweetAdd TweetAdd) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	updatedKeywords, err := AddFilter(tweetAdd.ScreenName, tweetAdd.Keywords)
 	if err != nil {
 		return
 	}
@@ -95,24 +99,29 @@ func (tweetAdd TweetAdd) handle(session *discordgo.Session, message *discordgo.M
 	return
 }
 
-func (tweetRemove TweetRemove) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+// Handle deals `tweet remove` command.
+func (tweetRemove TweetRemove) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
 	return
 }
 
-func (tweetDelete TweetDelete) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+// Handle deals `tweet delete` command.
+func (tweetDelete TweetDelete) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
 	return
 }
 
-func (tweetChange TweetChange) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+// Handle deals `tweet change` command.
+func (tweetChange TweetChange) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
 	return
 }
 
-func (tweetShow TweetShow) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+// Handle deals `tweet show` command.
+func (tweetShow TweetShow) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
 	return
 }
 
-func (memoShow MemoShow) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
-	memos, err := fetchMemo(message.ChannelID)
+// Handle deals `memo show` command.
+func (memoShow MemoShow) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	memos, err := FetchMemo(message.ChannelID)
 	if err != nil {
 		return
 	}
@@ -128,8 +137,9 @@ func (memoShow MemoShow) handle(session *discordgo.Session, message *discordgo.M
 	return
 }
 
-func (memoRegister MemoRegister) handle(session *discordgo.Session, message *discordgo.Message) (err error) {
-	reply, err := addMemo(message.ChannelID, memoRegister.Text)
+// Handle deals `memo` command.
+func (memoRegister MemoRegister) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	reply, err := CreateMemo(message.ChannelID, memoRegister.Text)
 	if err != nil {
 		return
 	}
