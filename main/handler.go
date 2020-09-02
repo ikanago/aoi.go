@@ -45,7 +45,6 @@ type TweetDelete struct {
 // TweetChange represents parsed results of `twitter change` command.
 type TweetChange struct {
 	ScreenName string
-	Channel    string
 }
 
 // TweetShow represents parsed results of `twitter show` command.
@@ -101,21 +100,50 @@ func (tweetAdd TweetAdd) Handle(session *discordgo.Session, message *discordgo.M
 
 // Handle deals `tweet remove` command.
 func (tweetRemove TweetRemove) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	updatedKeywords, err := RemoveFilter(tweetRemove.ScreenName, tweetRemove.Keywords)
+	if err != nil {
+		return
+	}
+	reply := fmt.Sprintf("@%s のフィルターを更新しました\n現在のキーワード: %s", tweetRemove.ScreenName, strings.Join(updatedKeywords, ", "))
+	_, err = session.ChannelMessageSend(message.ChannelID, reply)
 	return
 }
 
 // Handle deals `tweet delete` command.
 func (tweetDelete TweetDelete) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	if err = DeleteFilter(tweetDelete.ScreenName); err != nil {
+		return
+	}
+	reply := fmt.Sprintf("@%s のフィルターを削除しました", tweetDelete.ScreenName)
+	_, err = session.ChannelMessageSend(message.ChannelID, reply)
 	return
 }
 
 // Handle deals `tweet change` command.
 func (tweetChange TweetChange) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	if err = ChangeFilterChannel(tweetChange.ScreenName, message.ChannelID); err != nil {
+		return
+	}
+	reply := fmt.Sprintf("@%s のツイートはこのチャンネルに送信されます", tweetChange.ScreenName)
+	_, err = session.ChannelMessageSend(message.ChannelID, reply)
 	return
 }
 
 // Handle deals `tweet show` command.
 func (tweetShow TweetShow) Handle(session *discordgo.Session, message *discordgo.Message) (err error) {
+	filters, err := FetchFilters()
+	if err != nil {
+		return
+	}
+	reply := "現在のフィルターの一覧です\n"
+	for _, filter := range filters {
+		reply += fmt.Sprintf("%s: [", filter.ScreenName)
+		for _, keyword := range filter.Keywords {
+			reply += fmt.Sprintf(" %s, ", keyword)
+		}
+		reply += fmt.Sprint("]\n")
+	}
+	_, err = session.ChannelMessageSend(message.ChannelID, reply)
 	return
 }
 

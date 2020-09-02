@@ -98,10 +98,9 @@ func TestParseTweetCommand(t *testing.T) {
 	})
 
 	t.Run("Change command", func(t *testing.T) {
-		input := []string{"<@!1234567890>", "tweet", "change", "docker", "#container"}
+		input := []string{"<@!1234567890>", "tweet", "change", "docker"}
 		expected := TweetChange{
 			ScreenName: "docker",
-			Channel:    "container",
 		}
 		actual, err := parseTweetCommand(input)
 		assert := assert.New(t)

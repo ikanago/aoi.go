@@ -10,7 +10,7 @@ const idPatterns = `^[a-zA-Z0-9_]+$`
 
 var idRegexp = regexp.MustCompile(idPatterns)
 
-// ValidateTwitterID checks if given ID is well formed. 
+// ValidateTwitterID checks if given ID is well formed.
 func ValidateTwitterID(id string) (string, error) {
 	if idRegexp.MatchString(id) {
 		return id, nil

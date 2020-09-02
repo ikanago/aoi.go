@@ -17,10 +17,10 @@ func TestFilterTweet(t *testing.T) {
 
 	t.Run("Matched", func(t *testing.T) {
 		filter := &FilterDocument{
-			ID: "1111",
+			ID:         "1111",
 			ScreenName: "xxxx",
-			Keywords: []string{"創作2コマ漫画", "ねこ"},
-			ChannelID: "asdfghjkl",
+			Keywords:   []string{"創作2コマ漫画", "ねこ"},
+			ChannelID:  "asdfghjkl",
 		}
 		tweet := "創作2コマ漫画　そのxxx https://example.com"
 		expectedBool, expectedString := true, "asdfghjkl"
@@ -32,10 +32,10 @@ func TestFilterTweet(t *testing.T) {
 
 	t.Run("Not matched", func(t *testing.T) {
 		filter := &FilterDocument{
-			ID: "1111",
+			ID:         "1111",
 			ScreenName: "xxxx",
-			Keywords: []string{"創作2コマ漫画", "ねこ"},
-			ChannelID: "asdfghjkl",
+			Keywords:   []string{"創作2コマ漫画", "ねこ"},
+			ChannelID:  "asdfghjkl",
 		}
 		tweet := "RT @70_pocky: 創作2コマ漫画　そのxxx https://example.com"
 		expectedBool, expectedString := false, ""

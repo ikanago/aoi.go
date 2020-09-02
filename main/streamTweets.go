@@ -69,7 +69,7 @@ const hyperLinkPattern = `(http|https):\/\/([a-zA-Z0-9.]/?)+`
 
 var hyperLinkRegExp = regexp.MustCompile(hyperLinkPattern)
 
-func formatTweet(text, screenName , id string) string {
+func formatTweet(text, screenName, id string) string {
 	text = string(hyperLinkRegExp.ReplaceAll([]byte(text), []byte("")))
 	return fmt.Sprintf("%s\nhttps://twitter.com/%s/status/%s", text, screenName, id)
 }
