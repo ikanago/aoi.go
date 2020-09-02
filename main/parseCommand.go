@@ -80,7 +80,7 @@ func parseTweetCommand(arguments []string) (Command, error) {
 			ScreenName: screenName,
 		}, nil
 	case "change":
-		if err := assertArguments(arguments, 5, "IDとキーワードを指定してください"); err != nil {
+		if err := assertArguments(arguments, 4, "IDとキーワードを指定してください"); err != nil {
 			return nil, err
 		}
 		screenName, err := ValidateTwitterID(arguments[3])
@@ -89,7 +89,6 @@ func parseTweetCommand(arguments []string) (Command, error) {
 		}
 		return TweetChange{
 			ScreenName: screenName,
-			Channel:    FormatChannelID(arguments[4]),
 		}, nil
 	case "show":
 		return TweetShow{}, nil

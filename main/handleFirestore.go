@@ -51,7 +51,7 @@ func LoadFirestore(projectID string) (err error) {
 	ctx := context.Background()
 	firestoreClient, err = firestore.NewClient(ctx, projectID)
 
-	filters, err := fetchFilters()
+	filters, err := FetchFilters()
 	if err != nil {
 		return
 	}
@@ -64,7 +64,7 @@ func LoadFirestore(projectID string) (err error) {
 }
 
 // CreateFilter creates data on firestore.
-func CreateFilter(screenName string, filters []string, channelID string) (err error) {
+func CreateFilter(screenName string, keywords []string, channelID string) (err error) {
 	if _, exists := tweetFilters[screenName]; exists {
 		return errors.New("そのアカウントのフィルターは作成済みです\n`@Aoi tweet add ID KEYWORDS` を使ってください")
 	}
@@ -80,7 +80,7 @@ func CreateFilter(screenName string, filters []string, channelID string) (err er
 	filter := FilterDocument{
 		ID:         id,
 		ScreenName: screenName,
-		Keywords:   filters,
+		Keywords:   keywords,
 		ChannelID:  channelID,
 	}
 	_, err = doc.Create(ctx, filter)
@@ -94,15 +94,15 @@ func CreateFilter(screenName string, filters []string, channelID string) (err er
 }
 
 // AddFilter adds keywords to existing filter.
-func AddFilter(screenName string, filters []string) (updatedKeywords []string, err error) {
+func AddFilter(screenName string, keywords []string) (updatedKeywords []string, err error) {
 	if _, exists := tweetFilters[screenName]; !exists {
-		return nil, errors.New("そのアカウントのフィルターは存在しません\n`@Aoi tweet add ID KEYWORDS` でフィルターを作ってください")
+		return nil, errors.New("そのアカウントのフィルターは存在しません\n`@Aoi tweet create ID KEYWORDS` でフィルターを作ってください")
 	}
 
 	collection := firestoreClient.Collection(tweetFilterCollectionName)
 	doc := collection.Doc(screenName)
 	ctx := context.Background()
-	updatedKeywords = append(tweetFilters[screenName].Keywords, filters...)
+	updatedKeywords = append(tweetFilters[screenName].Keywords, keywords...)
 	tweetFilters[screenName].Keywords = updatedKeywords
 	_, err = doc.Update(ctx, []firestore.Update{
 		{
@@ -113,7 +113,75 @@ func AddFilter(screenName string, filters []string) (updatedKeywords []string, e
 	return
 }
 
-func fetchFilters() (filters []FilterDocument, err error) {
+// RemoveFilter removes keywords from a specific filter.
+func RemoveFilter(screenName string, keywords []string) (updatedKeywords []string, err error) {
+	if _, exists := tweetFilters[screenName]; !exists {
+		return nil, errors.New("そのアカウントのフィルターは存在しません\n`@Aoi tweet create ID KEYWORDS` でフィルターを作ってください")
+	}
+
+	collection := firestoreClient.Collection(tweetFilterCollectionName)
+	doc := collection.Doc(screenName)
+	ctx := context.Background()
+	updatedKeywords = removeElement(tweetFilters[screenName].Keywords, keywords)
+	tweetFilters[screenName].Keywords = updatedKeywords
+	_, err = doc.Update(ctx, []firestore.Update{
+		{
+			Path:  "keywords",
+			Value: updatedKeywords,
+		},
+	})
+	return
+}
+
+func removeElement(array, toRemove []string) (removed []string) {
+	for _, element := range array {
+		shouldRemove := false
+		for _, x := range toRemove {
+			if element == x {
+				shouldRemove = true
+			}
+		}
+		if !shouldRemove {
+			removed = append(removed, element)
+		}
+	}
+	return
+}
+
+// DeleteFilter deletes a filter whose name is `screenName`.
+func DeleteFilter(screenName string) (err error) {
+	if _, exists := tweetFilters[screenName]; !exists {
+		return errors.New("そのアカウントのフィルターは存在しません\n`@Aoi tweet create ID KEYWORDS` でフィルターを作ってください")
+	}
+
+	collection := firestoreClient.Collection(tweetFilterCollectionName)
+	doc := collection.Doc(screenName)
+	ctx := context.Background()
+	_, err = doc.Delete(ctx)
+	return
+}
+
+// ChangeFilterChannel changes a channel to which a tweet from `screenName` is sent.
+func ChangeFilterChannel(screenName, channelID string) (err error) {
+	if _, exists := tweetFilters[screenName]; !exists {
+		return errors.New("そのアカウントのフィルターは存在しません\n`@Aoi tweet create ID KEYWORDS` でフィルターを作ってください")
+	}
+
+	collection := firestoreClient.Collection(tweetFilterCollectionName)
+	doc := collection.Doc(screenName)
+	ctx := context.Background()
+	tweetFilters[screenName].ChannelID = channelID
+	_, err = doc.Update(ctx, []firestore.Update{
+		{
+			Path:  "channelID",
+			Value: channelID,
+		},
+	})
+	return
+}
+
+// FetchFilters gets filters from firestore.
+func FetchFilters() (filters []FilterDocument, err error) {
 	collection := firestoreClient.Collection(tweetFilterCollectionName)
 	ctx := context.Background()
 	docs, err := collection.Documents(ctx).GetAll()
