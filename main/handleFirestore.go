@@ -158,6 +158,8 @@ func DeleteFilter(screenName string) (err error) {
 	doc := collection.Doc(screenName)
 	ctx := context.Background()
 	_, err = doc.Delete(ctx)
+	delete(tweetFilters, screenName)
+	delete(screenNameToID, screenName)
 	return
 }
 
